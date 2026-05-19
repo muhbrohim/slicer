@@ -1,0 +1,762 @@
+================================================================================
+                              SLICER
+              Spec-Driven Fixed-Length Message Parser
+                         Documentation v1.0
+================================================================================
+
+
+TABLE OF CONTENTS
+--------------------------------------------------------------------------------
+  1.  Introduction
+  2.  Problem Statement
+  3.  Solution Overview
+  4.  Design Goals
+  5.  Non-Goals
+  6.  Core Concepts
+  7.  Architecture
+  8.  Module Responsibilities
+  9.  Data Flow
+  10. Directory Layout
+  11. Spec Language
+  12. Header Spec
+  13. Body Spec
+  14. Dispatcher Mechanics
+  15. Parser Engine
+  16. Offset Calculation
+  17. Validation
+  18. Error Handling
+  19. CLI Interface
+  20. Output Modes
+  21. Neovim Integration
+  22. Workflows
+  23. New API Onboarding
+  24. Batch Processing
+  25. Tech Stack
+  26. File Reference
+  27. Glossary
+  28. Roadmap
+  29. Philosophy
+
+
+================================================================================
+1. INTRODUCTION
+================================================================================
+
+  Name        : slicer
+  Command     : slice
+  Helper      : spec
+  Version     : 0.1.0
+  Language    : Python 3.10+
+  Platform    : Windows / Linux / macOS / Termux
+  License     : MIT
+
+  Slicer is a terminal-first developer tool that parses fixed-length
+  messages used by AS400, DB2 middleware, banking switch systems, and
+  legacy enterprise TCP APIs.
+
+  It replaces fragile Excel MID() workflows with maintainable,
+  spec-driven, version-controlled protocol definitions.
+
+
+================================================================================
+2. PROBLEM STATEMENT
+================================================================================
+
+  Enterprise developers debugging fixed-length protocol messages
+  currently rely on:
+
+    - manual Excel MID(A1,1,4) substring formulas
+    - manual offset arithmetic
+    - copy-paste workflows across many spreadsheet cells
+    - undocumented per-developer Excel files
+    - non-reusable, non-version-controlled parsing logic
+
+  These workflows are:
+
+    - error prone
+    - non-shareable
+    - non-scriptable
+    - slow for onboarding new APIs
+    - impossible to grep, diff, or audit
+
+
+================================================================================
+3. SOLUTION OVERVIEW
+================================================================================
+
+  Slicer provides:
+
+    - plaintext spec files describing each protocol
+    - a generic parser engine that consumes any spec
+    - a CLI command `slice` for terminal parsing
+    - a helper command `spec` for spec management
+    - Neovim keymaps for in-editor parsing
+    - JSON / raw / table / offset output modes
+    - graceful failure on truncated or malformed input
+
+  Workflow becomes:
+
+    copy raw message  ->  slice  ->  parsed table in 1 second
+
+
+================================================================================
+4. DESIGN GOALS
+================================================================================
+
+  - terminal-first workflow
+  - human-readable specs
+  - minimal typing
+  - fast protocol onboarding (under 1 minute)
+  - graceful error handling on malformed input
+  - Neovim-native integration
+  - grep-friendly, git-trackable specs
+  - zero configuration files
+  - cross-platform (Windows / Linux / Termux)
+
+
+================================================================================
+5. NON-GOALS
+================================================================================
+
+  - GUI workflows
+  - complex protocol DSL
+  - binary / TLV / ASN.1 protocol framework
+  - real TCP socket handling (slicer parses strings, not sockets)
+  - enterprise configuration boilerplate
+  - per-user installers
+
+
+================================================================================
+6. CORE CONCEPTS
+================================================================================
+
+  SPEC
+    A plaintext file mapping field names to fixed lengths.
+
+  HEADER SPEC
+    A single shared spec parsed first for every message. Must
+    contain a field named `service_code`.
+
+  BODY SPEC
+    A per-service-code spec loaded after the header is parsed.
+    File path: specs/body/{service_code}.spec
+
+  DISPATCHER
+    Reads header -> extracts service_code -> loads body spec.
+
+  PARSER ENGINE
+    Generic sequential offset slicer. Knows nothing about any
+    specific protocol.
+
+  PARSED FIELD
+    A (name, value, start, end) record produced by the parser.
+
+  PARSE RESULT
+    Aggregate of header fields, body fields, warnings, errors,
+    service_code, and any unparsed trailing payload.
+
+
+================================================================================
+7. ARCHITECTURE
+================================================================================
+
+                  +----------------------+
+                  |     raw message      |
+                  +----------+-----------+
+                             |
+                  +----------v-----------+
+                  |     spec_loader      |  reads header.spec
+                  +----------+-----------+
+                             |
+                  +----------v-----------+
+                  |        parser        |  sequential offset slice
+                  +----------+-----------+
+                             |
+                  +----------v-----------+
+                  |      dispatcher      |  loads body spec
+                  +----------+-----------+
+                             |
+                  +----------v-----------+
+                  |      validator       |  optional checks
+                  +----------+-----------+
+                             |
+                  +----------v-----------+
+                  |      formatter       |  table / json / raw
+                  +----------+-----------+
+                             |
+                  +----------v-----------+
+                  |         cli          |  typer entrypoint
+                  +----------------------+
+
+
+================================================================================
+8. MODULE RESPONSIBILITIES
+================================================================================
+
+  MODULE              RESPONSIBILITY
+  ----------------------------------------------------------------
+  spec_loader.py      parse plaintext spec into [(name, length)]
+  parser.py           pure function: slice string by spec
+  dispatcher.py       orchestrate header -> service_code -> body
+  validator.py        run type / required / numeric checks
+  formatter.py        render results (table / json / raw)
+  detector.py         optional service_code auto-detect
+  models.py           dataclasses: ParsedField, ParseResult
+  cli.py              Typer CLI exposing `slice` and `spec`
+
+
+================================================================================
+9. DATA FLOW
+================================================================================
+
+  raw message string
+      |
+      v
+  load header.spec
+      |
+      v
+  sequential_parse(message, header_fields, pos=0)
+      |
+      v
+  extract field named "service_code"
+      |
+      v
+  load body/{service_code}.spec
+      |
+      v
+  sequential_parse(message, body_fields, pos=current)
+      |
+      v
+  validate (optional)
+      |
+      v
+  collect ParseResult { header, body, warnings, errors, tail }
+      |
+      v
+  render (table / json / raw)
+
+
+================================================================================
+10. DIRECTORY LAYOUT
+================================================================================
+
+  slicer/
+  |
+  +-- pyproject.toml
+  +-- requirements.txt
+  +-- requirements-dev.txt
+  +-- README.md
+  +-- LICENSE
+  +-- .gitignore
+  +-- .pre-commit-config.yaml
+  |
+  +-- .github/
+  |   +-- workflows/
+  |       +-- ci.yml
+  |
+  +-- specs/
+  |   +-- header.spec
+  |   +-- body/
+  |       +-- CA1017.spec
+  |       +-- CA2020.spec
+  |
+  +-- slicer/
+  |   +-- __init__.py
+  |   +-- cli.py
+  |   +-- parser.py
+  |   +-- dispatcher.py
+  |   +-- formatter.py
+  |   +-- validator.py
+  |   +-- spec_loader.py
+  |   +-- detector.py
+  |   +-- models.py
+  |
+  +-- nvim/
+  |   +-- slicer.lua
+  |
+  +-- tests/
+  |   +-- test_parser.py
+  |   +-- test_spec_loader.py
+  |   +-- test_dispatcher.py
+  |
+  +-- sample_messages/
+      +-- ca1017_demo.txt
+
+
+================================================================================
+11. SPEC LANGUAGE
+================================================================================
+
+  SYNTAX
+    One field per line:
+
+        field_name    length
+
+    Whitespace between name and length is irrelevant.
+
+  COMMENTS
+    Lines starting with `#` are ignored.
+
+        # customer header section
+        cif       10
+        name      30
+
+  BLANK LINES
+    Ignored. Use freely to group sections.
+
+  FUTURE TYPE HINTS (planned v0.2)
+
+        amount    13   numeric
+        date       8   date:YYYYMMDD
+        status     2   enum:OK,KO,PD
+        name      30   string:required
+
+  RULES
+    - length must be a positive integer
+    - field names should be snake_case
+    - the header spec MUST contain a field named `service_code`
+
+
+================================================================================
+12. HEADER SPEC
+================================================================================
+
+  Location:
+    specs/header.spec
+
+  Purpose:
+    Shared structure parsed first for every message. Provides the
+    `service_code` used to dispatch to the correct body spec.
+
+  Example:
+
+        prefix          4
+        channel         8
+        service_code    6
+        device         20
+
+  Constraint:
+    Must contain a field named `service_code`. If missing, the
+    dispatcher emits an error and aborts body parsing.
+
+
+================================================================================
+13. BODY SPEC
+================================================================================
+
+  Location:
+    specs/body/{service_code}.spec
+
+  Purpose:
+    Per-API field definitions parsed after the header.
+
+  Example (specs/body/CA1017.spec):
+
+        transaction_id   12
+        amount           13
+        response_code     2
+        customer_name    30
+
+  Lookup Rule:
+    service_code = "CA1017"
+        -> loads specs/body/CA1017.spec
+
+  Missing Spec Behavior:
+    - emit warning
+    - keep parsed header fields
+    - present remaining payload as `unparsed_tail`
+
+
+================================================================================
+14. DISPATCHER MECHANICS
+================================================================================
+
+  Step 1: Read specs/header.spec
+  Step 2: Parse header from position 0
+  Step 3: Find field named `service_code`
+  Step 4: Strip whitespace from its value
+  Step 5: Compute body path = specs/body/{service_code}.spec
+  Step 6: If exists, parse body from current position
+  Step 7: If not, emit warning, store unparsed tail
+  Step 8: If trailing bytes remain after body, emit overflow warning
+
+
+================================================================================
+15. PARSER ENGINE
+================================================================================
+
+  Pure function. No I/O. No globals.
+
+  Signature:
+
+      sequential_parse(
+          message: str,
+          fields: list[(name, length)],
+          start_pos: int = 0,
+      ) -> (parsed_fields, new_pos, errors)
+
+  Algorithm:
+
+      pos = start_pos
+      for (name, length) in fields:
+          end = pos + length
+          if end > len(message):
+              emit truncation error
+              break
+          value = message[pos:end]
+          append ParsedField(name, value, pos, end-1)
+          pos = end
+      return (parsed_fields, pos, errors)
+
+  Properties:
+    - deterministic
+    - side-effect free
+    - trivially testable
+    - reusable for both header and body
+
+
+================================================================================
+16. OFFSET CALCULATION
+================================================================================
+
+  Offsets are computed automatically. The user never maintains them.
+
+  Example output (--offsets mode):
+
+      OFFSET      FIELD              VALUE
+      ----------------------------------------------------
+      0-3         prefix             ADSV
+      4-9         service_code       CA1017
+      10-22       amount             000000000135
+
+  Use cases:
+    - protocol debugging
+    - spec validation
+    - locating malformed bytes
+    - diffing two messages by position
+
+
+================================================================================
+17. VALIDATION
+================================================================================
+
+  v0.1 (current):
+    - field length enforcement (via truncation detection)
+
+  v0.2 (planned):
+    - numeric check
+    - required / non-empty check
+    - date format check
+    - enum membership check
+
+  Validation failures emit warnings; parsing continues. The system
+  never aborts on a single bad field.
+
+
+================================================================================
+18. ERROR HANDLING
+================================================================================
+
+  Slicer never crashes on malformed input.
+
+  CASE 1: Missing header.spec
+      -> [ERROR] Missing header.spec at <path>
+      -> return empty result
+
+  CASE 2: Missing service_code field in header
+      -> [ERROR] header.spec missing 'service_code' field
+      -> return header-only result
+
+  CASE 3: Missing body spec
+      -> [WARN] Missing body spec: CA7777.spec
+      -> show header
+      -> show unparsed_tail raw
+
+  CASE 4: Truncated message
+      -> [ERROR] Message truncated at field 'X' (need N, have M)
+      -> return successfully parsed fields so far
+
+  CASE 5: Overflow (message longer than spec)
+      -> [WARN] Extra trailing payload detected (N bytes)
+      -> show unparsed_tail
+
+  CASE 6: Invalid spec syntax
+      -> ValueError with file:line context
+
+
+================================================================================
+19. CLI INTERFACE
+================================================================================
+
+  COMMAND : slice
+  PURPOSE : parse one message
+
+      slice                       interactive paste mode
+      slice "MESSAGE"             positional argument
+      cat msg.txt | slice         stdin pipe
+      Get-Content msg.txt | slice (PowerShell pipe)
+
+  OPTIONS:
+      --json        JSON output
+      --raw         key=value output
+      --offsets     include offset column
+
+  COMMAND : spec
+  PURPOSE : manage spec files
+
+      spec list                   list all body specs
+      spec show CA1017            print contents of a spec
+      spec create CA2020          paste table -> write spec file
+
+
+================================================================================
+20. OUTPUT MODES
+================================================================================
+
+  20.1 RICH TABLE (default)
+
+      service_code: CA1017
+
+      FIELD              VALUE
+      ----------------------------------------------------
+      prefix             ADSV
+      channel            MOBILE
+      service_code       CA1017
+      device             DEVICE-001-ABCDEFGH
+      transaction_id     TRX000000001
+      amount             000000000135
+      response_code      00
+      customer_name      JOHN DOE
+
+  20.2 JSON
+
+      {
+        "service_code": "CA1017",
+        "header": { ... },
+        "body":   { ... },
+        "warnings": [],
+        "errors":   [],
+        "unparsed_tail": null
+      }
+
+  20.3 RAW (key=value)
+
+      prefix=ADSV
+      channel=MOBILE
+      service_code=CA1017
+      amount=000000000135
+
+  20.4 OFFSET VIEW
+
+      Same as table, plus an OFFSET column showing start-end indices.
+
+
+================================================================================
+21. NEOVIM INTEGRATION
+================================================================================
+
+  PRINCIPLE
+    All business logic lives in the Python CLI. The Lua plugin is
+    only a thin wrapper that shells out to `slice`.
+
+  KEYMAPS
+    <leader>sp    slice current line
+    <leader>ss    slice visual selection
+    <leader>so    open spec matching CA#### on current line
+
+  OUTPUT BUFFER
+    Opens in a right vertical split with:
+        buftype    = nofile
+        bufhidden  = wipe
+        swapfile   = false
+        modifiable = false
+        filetype   = slicer-output
+
+  REQUIRED ENV VAR (for <leader>so):
+    SLICER_HOME  =  path to slicer project root
+
+
+================================================================================
+22. WORKFLOWS
+================================================================================
+
+  22.1 INTERACTIVE
+
+      slice
+      (paste message)
+      (Ctrl-Z + Enter)
+
+  22.2 ARGUMENT
+
+      slice "ADSVMOBILE  CA1017..."
+
+  22.3 PIPE
+
+      cat message.txt | slice
+      Get-Content log.txt | slice
+
+  22.4 CLIPBOARD (Windows)
+
+      Get-Clipboard | slice
+
+  22.5 NEOVIM
+
+      yank or visual-select a line, press <leader>sp
+
+
+================================================================================
+23. NEW API ONBOARDING
+================================================================================
+
+  Step 1: Receive protocol doc (Excel / Word / email / plaintext).
+  Step 2: Run:
+
+      spec create CA2020
+
+  Step 3: Paste FIELD LENGTH lines.
+  Step 4: End input with Ctrl-Z + Enter.
+  Step 5: File created at specs/body/CA2020.spec
+  Step 6: Commit to git:
+
+      git add specs/body/CA2020.spec
+      git commit -m "spec: add CA2020 onboarding"
+      git push
+
+  Total time: under 1 minute.
+
+
+================================================================================
+24. BATCH PROCESSING
+================================================================================
+
+  Parse many messages from a log dump:
+
+      Get-Content db2_dump.txt |
+          ForEach-Object { $_ | slice --raw }
+
+  Find which messages lack body specs:
+
+      Get-Content all_messages.txt |
+          ForEach-Object { $_ | slice --json } |
+          Select-String "Missing body spec"
+
+  Diff two parsed messages:
+
+      slice "MSG1" --raw > a.txt
+      slice "MSG2" --raw > b.txt
+      git diff --no-index a.txt b.txt
+
+
+================================================================================
+25. TECH STACK
+================================================================================
+
+  LAYER                  CHOICE
+  ----------------------------------------------------------------
+  Core language          Python 3.10+
+  CLI framework          Typer
+  Terminal UI            Rich
+  Spec parsing           Custom plaintext parser
+  Validation             Pydantic (v0.2+)
+  Editor integration     Lua (Neovim)
+  Future TUI             Textual
+  Test framework         pytest
+  Linter / formatter     Ruff
+  CI                     GitHub Actions
+
+
+================================================================================
+26. FILE REFERENCE
+================================================================================
+
+  FILE                              ROLE
+  ----------------------------------------------------------------
+  pyproject.toml                    package metadata + entrypoints
+  requirements.txt                  runtime deps
+  requirements-dev.txt              dev/test deps
+  .gitignore                        venv, cache, build artifacts
+  .pre-commit-config.yaml           ruff hooks
+  .github/workflows/ci.yml          test matrix
+  README.md                         quickstart
+  LICENSE                           MIT
+  specs/header.spec                 shared header definition
+  specs/body/*.spec                 per-API body definitions
+  slicer/__init__.py                version constant
+  slicer/cli.py                     `slice` and `spec` commands
+  slicer/parser.py                  sequential_parse function
+  slicer/dispatcher.py              parse_message orchestration
+  slicer/spec_loader.py             load_spec / spec_total_length
+  slicer/formatter.py               render_table / render_json / render_raw
+  slicer/validator.py               numeric / required checks
+  slicer/detector.py                fallback service_code detection
+  slicer/models.py                  ParsedField / ParseResult
+  nvim/slicer.lua                   Neovim plugin
+  tests/*.py                        pytest suite
+  sample_messages/*.txt             example payloads
+
+
+================================================================================
+27. GLOSSARY
+================================================================================
+
+  SPEC                a plaintext file mapping field name -> length
+  HEADER              the shared front portion of every message
+  BODY                the API-specific tail portion of a message
+  SERVICE CODE        the identifier (e.g. CA1017) selecting a body spec
+  PARSED FIELD        one (name, value, start, end) tuple
+  PARSE RESULT        full record: header + body + warnings + errors
+  DISPATCHER          the module that selects which body spec to load
+  UNPARSED TAIL       bytes left over after parsing finishes
+  TRUNCATION          message shorter than the spec requires
+  OVERFLOW            message longer than the spec consumes
+
+
+================================================================================
+28. ROADMAP
+================================================================================
+
+  v0.1   sequential parser, dispatcher, CLI, Neovim integration
+  v0.2   typed validation (numeric / required / date / enum)
+  v0.3   `spec validate` linter
+  v0.4   hex view and binary mode
+  v0.5   message diff viewer (`slice diff a.txt b.txt`)
+  v0.6   Textual TUI mode (`slice tui`)
+  v0.7   message builder (`slice build CA1017 amount=135`)
+  v0.8   request / response correlation
+  v0.9   TCP replay (`slice replay --host ... --port ...`)
+  v1.0   spec versioning + multi-version dispatch
+
+
+================================================================================
+29. PHILOSOPHY
+================================================================================
+
+  Slicer is not a generic parser framework.
+
+  It is a developer-first protocol inspection tool optimized for:
+
+    - enterprise fixed-length messages
+    - AS400 / DB2 environments
+    - terminal-first debugging
+    - rapid protocol onboarding
+    - middleware troubleshooting
+
+  Guiding principles:
+
+    - human-first specs
+    - minimal friction
+    - graceful failures
+    - fast parsing
+    - terminal-native UX
+    - editor integration
+    - spec-driven architecture
+    - reusable parser engine
+    - everything plaintext, everything git-trackable
+
+  Primary focus:
+    developer productivity and protocol visibility.
+
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================

@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "slicer"
+version = "0.1.0"
+description = "Spec-driven fixed-length message parser for AS400/DB2/banking switch payloads"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "slicer maintainers" }]
+keywords = ["parser", "fixed-length", "as400", "db2", "banking", "iso8583", "tcp"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Debuggers",
+    "Topic :: Terminals",
+]
+dependencies = [
+    "typer>=0.12.0",
+    "rich>=13.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.5.0",
+    "pre-commit>=3.7.0",
+]
+
+[project.scripts]
+slice = "slicer.cli:slice_app"
+spec  = "slicer.cli:spec_app"
+
+[project.urls]
+Documentation = "https://github.com/your-org/slicer"
+Source        = "https://github.com/your-org/slicer"
+Issues        = "https://github.com/your-org/slicer/issues"
+
+[tool.setuptools.packages.find]
+include = ["slicer*"]
+exclude = ["tests*", "specs*", "sample_messages*", "nvim*", "docs*"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# Typer requires call-in-default for Option/Argument; this is the documented pattern.
+"slicer/cli.py" = ["B008"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
