@@ -25,14 +25,28 @@ See [`docs/DESIGN.txt`](docs/DESIGN.txt) for the full design document.
 
 ## Install
 
-```bash
-# from source
+```powershell
 git clone <repo>
 cd slicer
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 python -m pip install -e ".[dev]"
 ```
 
-Two CLI entry points are installed:
+To make `slice` and `spec` available in every PowerShell window without
+activation, add the venv's `Scripts` folder to your User PATH:
+
+```powershell
+$venvScripts = (Resolve-Path .\.venv\Scripts).Path
+[Environment]::SetEnvironmentVariable(
+    'Path',
+    "$([Environment]::GetEnvironmentVariable('Path','User'));$venvScripts",
+    'User'
+)
+[Environment]::SetEnvironmentVariable('SLICER_HOME', (Get-Location).Path, 'User')
+```
+
+Open a new PowerShell window and the two CLI entry points are on PATH:
 
 | command | purpose                       |
 |---------|-------------------------------|
@@ -43,48 +57,48 @@ Requires Python 3.10+.
 
 ---
 
-## Quickstart
+## Quickstart — real example
 
-1. Define a shared header at `specs/header.spec`:
+The repository ships with a real production payload at
+`sample_messages/us1003_real.txt` and the matching specs:
 
-   ```
-   prefix          4
-   channel         8
-   service_code    6
-   device         20
-   ```
+- `specs/header.spec` — 220-byte DSVI-HDR-INFO TCP envelope.
+- `specs/body/#US1003.spec` — response prefix + echo block + 20-element
+  customer array + `#LOC` terminator.
 
-2. Define a body per API at `specs/body/CA1017.spec`:
+Parse it:
 
-   ```
-   transaction_id   12
-   amount           13
-   response_code     2
-   customer_name    30
-   ```
+```powershell
+slice "$(Get-Content $env:SLICER_HOME\sample_messages\us1003_real.txt -Raw)"
+```
 
-3. Parse a message:
+You'll see the TCP header fields (`HDR_TAG=ADSVADSV`, `service_code=#US1003`,
+`HDR_DATA_LEN=00953`, ...), the response prefix (`resp_code=06`, `key_type=G`,
+`key_bank=1327`), the echo block, and twenty fully-parsed customer records.
 
-   ```bash
-   slice "$(Get-Content sample_messages/ca1017_demo.txt)"
-   ```
+Switch to JSON to get the array as a real list:
 
-   Output (default rich table):
+```powershell
+slice "$(Get-Content $env:SLICER_HOME\sample_messages\us1003_real.txt -Raw)" --json
+```
 
-   ```
-   service_code: CA1017
-
-   FIELD              VALUE
-   ----------------------------------------------------
-   prefix             ADSV
-   channel            MOBILE
-   service_code       CA1017
-   device             DEVICE-001-ABCDEFGH
-   transaction_id     TRX000000001
-   amount             0000000001350
-   response_code      00
-   customer_name      JOHN DOE
-   ```
+```json
+{
+  "service_code": "#US1003",
+  "header": { "HDR_TAG": "ADSVADSV", "service_code": "#US1003", ... },
+  "body": {
+    "resp_code": "06",
+    "key_type": "G",
+    "key_bank": "1327",
+    "records": [
+      { "break": "=01=", "cifNumber": "WL_0001         ", "mobileNumber": "0909809898          ", "customerStatus": "1 " },
+      { "break": "=02=", "cifNumber": "0000000000000001", ... },
+      ...
+    ],
+    "loc_end": "#LOC"
+  }
+}
+```
 
 ---
 
@@ -92,26 +106,85 @@ Requires Python 3.10+.
 
 ### `slice`
 
-```bash
-slice                       # interactive paste (Ctrl-Z + Enter on Windows, Ctrl-D on *nix)
-slice "MESSAGE..."          # positional
-cat msg.txt   | slice       # stdin (bash)
-Get-Content msg.txt | slice # stdin (PowerShell)
+```powershell
+slice                       # interactive: paste, then press Enter
+slice "MESSAGE..."          # positional argument
+Get-Content msg.txt | slice # stdin
+Get-Clipboard | slice       # clipboard
 
-slice --json                # JSON output
-slice --raw                 # key=value output
-slice --offsets             # include start-end column
+slice $msg --json           # nested JSON
+slice $msg --raw            # flat key=value lines
+slice $msg --offsets        # add start-end column
+slice $msg --specs-dir D:\other\specs   # override specs directory
 ```
 
-Combine with `--specs-dir DIR` to point at a non-default specs directory
-(default is `$SLICER_HOME/specs` or `./specs`).
+Default specs directory is `$env:SLICER_HOME\specs`, falling back to `.\specs`.
 
 ### `spec`
 
-```bash
-spec list                   # list all body specs
-spec show CA1017            # print one spec
-spec create CA2020          # paste "field length" lines, Ctrl-Z + Enter to save
+```powershell
+spec list                   # show all body specs (field count + bytes)
+spec show header            # print the header spec
+spec show '#US1003'         # print one body spec (quote names with #)
+spec create CA9000          # paste field-length lines, blank Enter to save
+```
+
+---
+
+## Spec format
+
+One field per line, name then length. Comments start with `#`. Blank lines
+are ignored.
+
+```
+# header section
+HDR_TAG               8
+HDR_SERVICE_TYPE      1
+service_code          7
+HDR_CLIENT_ID        20
+```
+
+**Required:** the header spec must define a field literally named
+`service_code`. The dispatcher uses its value to load
+`specs/body/{service_code}.spec` (`#`, alphanumerics — anything legal as a
+Windows filename is fine).
+
+### Arrays — `@repeat ... @end`
+
+For protocols with a fixed-count repeating block, use a `@repeat` directive:
+
+```
+# echo block (scalars)
+echo_cifNumber       16
+echo_uid             20
+
+# 20 customer records, 42 bytes each
+@repeat records 20
+    break             4
+    cifNumber        16
+    mobileNumber     20
+    customerStatus    2
+@end
+
+loc_end               4
+```
+
+The parser emits each record's fields as `records[01].break`,
+`records[01].cifNumber`, ... `records[20].customerStatus`. JSON output
+collapses them into a real array under `records`.
+
+Nested `@repeat` is not supported in v0.1.
+
+### Planned for v0.2 — typed fields
+
+The loader already accepts forward-compatible type hints (parsed but ignored
+in v0.1):
+
+```
+amount    13   numeric
+date       8   date:YYYYMMDD
+status     2   enum:OK,KO,PD
+name      30   string:required
 ```
 
 ---
@@ -123,42 +196,22 @@ A thin Lua wrapper lives at [`nvim/slicer.lua`](nvim/slicer.lua).
 ```
 <leader>sp    slice the current line
 <leader>ss    slice the visual selection
-<leader>so    open the spec matching CA#### on the current line
+<leader>so    open the spec whose service code appears on the current line
 ```
 
 Set `SLICER_HOME` so the plugin can find your specs:
 
 ```lua
-vim.env.SLICER_HOME = "/path/to/slicer"
+vim.env.SLICER_HOME = "C:/Users/you/personal/slicer"
 require("slicer").setup()
 ```
-
----
-
-## Spec format
-
-One field per line, name then length. Comments start with `#`. Blank lines
-are ignored.
-
-```
-# customer header section
-cif       10
-name      30
-amount    13   # trailing comment also allowed
-```
-
-The header spec **must** define a field named `service_code`. The dispatcher
-uses its value to load the matching body spec from `specs/body/{code}.spec`.
-
-Planned in v0.2: type hints like `amount 13 numeric`, `date 8 date:YYYYMMDD`,
-`status 2 enum:OK,KO,PD`.
 
 ---
 
 ## Error handling
 
 Slicer never crashes on malformed input. Instead it returns a result with
-warnings/errors and whatever was parsed successfully:
+warnings/errors plus whatever was parsed successfully:
 
 | situation                      | behavior                                  |
 |--------------------------------|-------------------------------------------|
@@ -169,15 +222,19 @@ warnings/errors and whatever was parsed successfully:
 | message longer than spec       | warning, expose `unparsed_tail`           |
 | invalid spec syntax            | `ValueError` with file:line context       |
 
+CLI exit code is `0` on a clean parse, `1` when errors were recorded, `2`
+on bad invocation.
+
 ---
 
 ## Tests
 
-```bash
+```powershell
 pytest -q
 ```
 
-CI runs Ubuntu / Windows / macOS on Python 3.10–3.12. See
+39 cases across `test_parser.py`, `test_spec_loader.py`, `test_dispatcher.py`.
+CI runs Windows on Python 3.10–3.12. See
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
 ---
@@ -185,7 +242,7 @@ CI runs Ubuntu / Windows / macOS on Python 3.10–3.12. See
 ## Roadmap
 
 ```
-v0.1   sequential parser, dispatcher, CLI, Neovim integration    (this release)
+v0.1   sequential parser, dispatcher, CLI, Neovim, @repeat arrays  (current)
 v0.2   typed validation (numeric / required / date / enum)
 v0.3   `spec validate` linter
 v0.4   hex view and binary mode

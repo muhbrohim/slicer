@@ -6,7 +6,7 @@ from pathlib import Path
 
 from slicer.models import ParseResult
 from slicer.parser import sequential_parse
-from slicer.spec_loader import load_spec
+from slicer.spec_loader import ScalarField, load_spec
 
 SERVICE_CODE_FIELD = "service_code"
 
@@ -42,7 +42,10 @@ def parse_message(
     if service_code is None:
         # Truncated header may legitimately have no service_code, but the
         # spec itself must always define one — that case is a hard error.
-        if not any(name == SERVICE_CODE_FIELD for name, _ in header_fields):
+        if not any(
+            isinstance(item, ScalarField) and item.name == SERVICE_CODE_FIELD
+            for item in header_fields
+        ):
             result.errors.append("header.spec missing 'service_code' field")
         return result
 

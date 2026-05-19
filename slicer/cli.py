@@ -13,7 +13,7 @@ from rich.console import Console
 from slicer import __version__
 from slicer.dispatcher import parse_message
 from slicer.formatter import render_json, render_raw, render_table
-from slicer.spec_loader import load_spec, spec_total_length
+from slicer.spec_loader import load_spec, spec_field_count, spec_total_length
 
 # Rich uses Unicode box characters; ensure stdout/stderr can encode them on
 # Windows consoles that default to cp1252.
@@ -44,10 +44,11 @@ def _read_message(message: str | None) -> str:
         return message
     if not sys.stdin.isatty():
         return sys.stdin.read().rstrip("\r\n")
-    _console.print(
-        "[dim]Paste message, then end with Ctrl-Z + Enter (Windows) or Ctrl-D (Unix):[/dim]"
-    )
-    return sys.stdin.read().rstrip("\r\n")
+    _console.print("[dim]Paste message and press Enter:[/dim]")
+    try:
+        return input()
+    except EOFError:
+        return ""
 
 
 # ---------------------------------------------------------------------------
@@ -129,8 +130,9 @@ def spec_list(
     for path in specs:
         try:
             fields = load_spec(path)
+            count = spec_field_count(fields)
             total = spec_total_length(fields)
-            typer.echo(f"{path.stem:<12} {len(fields):>3} fields  {total:>4} bytes")
+            typer.echo(f"{path.stem:<12} {count:>4} fields  {total:>5} bytes")
         except (ValueError, FileNotFoundError) as exc:
             typer.echo(f"{path.stem:<12} [invalid: {exc}]")
 
@@ -167,10 +169,21 @@ def spec_create(
 
     if sys.stdin.isatty():
         _console.print(
-            f"[dim]Paste 'field length' lines for {name}. "
-            f"End with Ctrl-Z + Enter (Windows) or Ctrl-D (Unix).[/dim]"
+            f"[dim]Paste 'field length' lines for {name}, "
+            f"then press Enter on a blank line to finish:[/dim]"
         )
-    content = sys.stdin.read()
+        lines: list[str] = []
+        while True:
+            try:
+                line = input()
+            except EOFError:
+                break
+            if line == "":
+                break
+            lines.append(line)
+        content = "\n".join(lines) + ("\n" if lines else "")
+    else:
+        content = sys.stdin.read()
 
     out.write_text(content, encoding="utf-8")
 
@@ -181,4 +194,6 @@ def spec_create(
         typer.echo(f"warning: spec written but failed to parse: {exc}", err=True)
         raise typer.Exit(code=1) from exc
 
-    typer.echo(f"wrote {out} ({len(fields)} fields, {spec_total_length(fields)} bytes)")
+    typer.echo(
+        f"wrote {out} ({spec_field_count(fields)} fields, {spec_total_length(fields)} bytes)"
+    )

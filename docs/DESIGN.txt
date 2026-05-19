@@ -47,7 +47,7 @@ TABLE OF CONTENTS
   Helper      : spec
   Version     : 0.1.0
   Language    : Python 3.10+
-  Platform    : Windows / Linux / macOS / Termux
+  Platform    : Windows
   License     : MIT
 
   Slicer is a terminal-first developer tool that parses fixed-length
@@ -111,7 +111,7 @@ TABLE OF CONTENTS
   - Neovim-native integration
   - grep-friendly, git-trackable specs
   - zero configuration files
-  - cross-platform (Windows / Linux / Termux)
+  - Windows native
 
 
 ================================================================================
@@ -491,10 +491,9 @@ TABLE OF CONTENTS
   COMMAND : slice
   PURPOSE : parse one message
 
-      slice                       interactive paste mode
+      slice                       interactive paste mode (press Enter to submit)
       slice "MESSAGE"             positional argument
-      cat msg.txt | slice         stdin pipe
-      Get-Content msg.txt | slice (PowerShell pipe)
+      Get-Content msg.txt | slice stdin pipe
 
   OPTIONS:
       --json        JSON output
@@ -584,7 +583,7 @@ TABLE OF CONTENTS
 
       slice
       (paste message)
-      (Ctrl-Z + Enter)
+      (Enter)
 
   22.2 ARGUMENT
 
@@ -592,10 +591,9 @@ TABLE OF CONTENTS
 
   22.3 PIPE
 
-      cat message.txt | slice
       Get-Content log.txt | slice
 
-  22.4 CLIPBOARD (Windows)
+  22.4 CLIPBOARD
 
       Get-Clipboard | slice
 
@@ -614,7 +612,7 @@ TABLE OF CONTENTS
       spec create CA2020
 
   Step 3: Paste FIELD LENGTH lines.
-  Step 4: End input with Ctrl-Z + Enter.
+  Step 4: Press Enter on a blank line to finish.
   Step 5: File created at specs/body/CA2020.spec
   Step 6: Commit to git:
 
