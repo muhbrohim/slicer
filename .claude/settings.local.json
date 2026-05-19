@@ -22,7 +22,18 @@
       "PowerShell(Set-Location 'C:\\\\Users\\\\w200221\\\\personal\\\\slicer'; $env:SLICER_HOME = 'C:\\\\Users\\\\w200221\\\\personal\\\\slicer'; $msg = \\(Get-Content '.\\\\sample_messages\\\\us1003_real.txt' -Raw\\).TrimEnd\\(\"`r\",\"`n\"\\); \"message length: $\\($msg.Length\\)\"; \"---\"; & '.\\\\.venv\\\\Scripts\\\\slice.exe' $msg --raw 2>&1 | Out-String)",
       "PowerShell(Set-Location 'C:\\\\Users\\\\w200221\\\\personal\\\\slicer'; $env:SLICER_HOME = 'C:\\\\Users\\\\w200221\\\\personal\\\\slicer'; $msg = \\(Get-Content '.\\\\sample_messages\\\\us1003_real.txt' -Raw\\).TrimEnd\\(\"`r\",\"`n\"\\); $json = & '.\\\\.venv\\\\Scripts\\\\slice.exe' $msg --json; $obj = $json | ConvertFrom-Json; \"service_code: $\\($obj.service_code\\)\"; \"errors: $\\($obj.errors.Count\\)\"; \"warnings: $\\($obj.warnings.Count\\)\"; \"header keys: $\\($obj.header.PSObject.Properties.Name -join ', '\\)\"; \"body top-level keys: $\\($obj.body.PSObject.Properties.Name -join ', '\\)\"; \"records count: $\\($obj.body.records.Count\\)\"; \"records[0]:\"; $obj.body.records[0] | Format-List)",
       "PowerShell(Set-Location 'C:\\\\Users\\\\w200221\\\\personal\\\\slicer'; $env:SLICER_HOME = 'C:\\\\Users\\\\w200221\\\\personal\\\\slicer'; $msg = \\(Get-Content '.\\\\sample_messages\\\\us1003_real.txt' -Raw\\).TrimEnd\\(\"`r\",\"`n\"\\); & '.\\\\.venv\\\\Scripts\\\\slice.exe' $msg --offsets 2>&1 | Select-Object -First 50)",
-      "PowerShell(Set-Location 'C:\\\\Users\\\\w200221\\\\personal\\\\slicer'; $env:SLICER_HOME = 'C:\\\\Users\\\\w200221\\\\personal\\\\slicer'; & '.\\\\.venv\\\\Scripts\\\\spec.exe' list 2>&1 | Out-String)"
+      "PowerShell(Set-Location 'C:\\\\Users\\\\w200221\\\\personal\\\\slicer'; $env:SLICER_HOME = 'C:\\\\Users\\\\w200221\\\\personal\\\\slicer'; & '.\\\\.venv\\\\Scripts\\\\spec.exe' list 2>&1 | Out-String)",
+      "Bash(python *)",
+      "PowerShell(python scripts\\\\_write_ani6000_sample.py)",
+      "PowerShell(slice \"$\\(Get-Content .\\\\sample_messages\\\\ani6000_real.txt -Raw\\)\" --offsets)",
+      "PowerShell(python scripts\\\\_write_ca1030_sample.py)",
+      "PowerShell(slice \"$\\(Get-Content .\\\\sample_messages\\\\ca1030_real.txt -Raw\\)\" --offsets 2>&1 | Select-Object -First 60)",
+      "PowerShell(slice \"$\\(Get-Content .\\\\sample_messages\\\\ca1030_real.txt -Raw\\)\" --offsets 2>&1 | Select-Object -Last 15)",
+      "PowerShell(slice \"$\\(Get-Content .\\\\sample_messages\\\\ca1030_real.txt -Raw\\)\" --json 2>&1 | python -c \"import sys, json; d = json.loads\\(sys.stdin.read\\(\\)\\); print\\('top keys:', list\\(d.keys\\(\\)\\)\\); print\\('body keys:', list\\(d['body'].keys\\(\\)\\)\\); print\\('len\\(billedTransactions\\):', len\\(d['body']['billedTransactions']\\)\\); print\\('record 1:', json.dumps\\(d['body']['billedTransactions'][0], indent=2\\)\\); print\\('record 2 transactionDescription:', repr\\(d['body']['billedTransactions'][1]['transactionDescription']\\)\\)\")",
+      "PowerShell(python -c \"from slicer.spec_loader import load_spec, spec_total_length, spec_field_count; from slicer.spec_loader import RepeatGroup; s = load_spec\\('specs/body/#CA1033.spec'\\); print\\('items:', len\\(s\\)\\); print\\('total bytes:', spec_total_length\\(s\\)\\); print\\('parsed fields:', spec_field_count\\(s\\)\\); g = next\\(i for i in s if isinstance\\(i, RepeatGroup\\)\\); print\\('per-statement bytes:', g.length // g.count\\); print\\('statement field count:', len\\(g.fields\\)\\)\")",
+      "PowerShell(spec list *)",
+      "PowerShell(python scripts\\\\generate_specs.py)",
+      "PowerShell(python scripts\\\\generate_specs.py 2>&1 | Select-Object -Last 15)"
     ]
   }
 }
