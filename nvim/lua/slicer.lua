@@ -22,6 +22,7 @@ local defaults = {
 }
 
 local config = vim.deepcopy(defaults)
+local cmd_ok = true
 
 -- ---------------------------------------------------------------------------
 -- helpers
@@ -29,6 +30,25 @@ local config = vim.deepcopy(defaults)
 
 local function notify(msg, level)
   vim.notify("[slicer] " .. msg, level or vim.log.levels.INFO)
+end
+
+local function validate_cmd()
+  -- Skip validation for multi-word commands (e.g. "python -m slicer");
+  -- vim.fn.executable can't handle them and the user clearly knows what they want.
+  if config.slice_cmd:find("%s") then
+    cmd_ok = true
+    return true
+  end
+  if vim.fn.executable(config.slice_cmd) == 1 then
+    cmd_ok = true
+    return true
+  end
+  cmd_ok = false
+  notify(
+    ("slice_cmd not executable: %s\nCheck your config or recreate the venv."):format(config.slice_cmd),
+    vim.log.levels.ERROR
+  )
+  return false
 end
 
 local function open_output(text)
@@ -44,6 +64,10 @@ local function open_output(text)
 end
 
 local function run_slice(message)
+  if not cmd_ok then
+    notify("slice_cmd unavailable (" .. config.slice_cmd .. ")", vim.log.levels.ERROR)
+    return
+  end
   if not message or message == "" then
     notify("no message to slice", vim.log.levels.WARN)
     return
@@ -124,6 +148,7 @@ end
 
 function M.setup(opts)
   config = vim.tbl_deep_extend("force", defaults, opts or {})
+  validate_cmd()
 
   vim.api.nvim_create_user_command("SliceLine", M.slice_line, {})
   vim.api.nvim_create_user_command("SliceSelection", M.slice_selection, { range = true })
