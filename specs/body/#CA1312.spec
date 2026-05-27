@@ -1,3 +1,9 @@
+# service-code: #CA1312
+# endpoint:     /card/ipp-eligible-transaction-by-program-get
+# category:     CA
+# section:      3.12
+# program:      LHBSC12S
+#
 # #CA1312 - generated from CTBCLH12 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

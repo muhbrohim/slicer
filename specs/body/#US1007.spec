@@ -1,3 +1,9 @@
+# service-code: #US1007
+# endpoint:     /customer/customer-address-set
+# category:     US
+# section:      3.22
+# program:      LHBSU07S
+#
 # #US1007 - generated from CTBCLH22 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

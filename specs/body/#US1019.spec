@@ -1,3 +1,9 @@
+# service-code: #US1019
+# endpoint:     /customer/close-account-amt-cal
+# category:     US
+# section:      4.31
+# program:      LHBSU19S
+#
 # #US1019 - generated from CTBCLH60 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

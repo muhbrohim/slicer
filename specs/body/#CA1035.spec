@@ -1,3 +1,9 @@
+# service-code: #CA1035
+# endpoint:     /card/cs-unbilled-transaction-inquiry
+# category:     CA
+# section:      4.8
+# program:      LHBSC35S
+#
 # #CA1035 - generated from CTBCLH31 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.
@@ -20,19 +26,20 @@ availableLimit                  13    # M A  number (double)
 lastUsedDate                     8    # M A  YYYYMMDD
 cardNumberMask                  19    # M A
 cardMainType                     1    # M A  P=Primary, S=Supplementary
-transactionDate                  8    # M N  YYYYMMDD
-transactionTime                  6    # M N  HHMMSS
-transactionCode                  4    # M A
-transactionAmount               13    # M A  number (double)
-transactionCurrency              3    # M N
-transactionChannel              10    # O A
-transactionDescription          41    # O A  YYYYMMDD
-postDate                         8    # O A  nullable: true
-acquirerCountry                  3    # O A  mcc; nullable: true
-merchantCategoryCode             4    # M A
-merchantId                      15    # O A
-retrievalReferenceNumber        23    # O A  D=Debit, C=Credit
-transactionType                  2    # M A
-authorizationCode                6    # O N  nullable: true
-referenceNumber_2               11    # O N
-
+@repeat txnList 8
+    transactionDate                  8    # M N  YYYYMMDD
+    transactionTime                  6    # M N  HHMMSS
+    transactionCode                  4    # M A
+    transactionAmount               13    # M A  number (double)
+    transactionCurrency              3    # M N
+    transactionChannel              10    # O A
+    transactionDescription          41    # O A  YYYYMMDD
+    postDate                         8    # O A  nullable: true
+    acquirerCountry                  3    # O A  mcc; nullable: true
+    merchantCategoryCode             4    # M A
+    merchantId                      15    # O A
+    retrievalReferenceNumber        23    # O A  D=Debit, C=Credit
+    transactionType                  2    # M A
+    authorizationCode                6    # O N  nullable: true
+    referenceNumber_2               11    # O N
+@end

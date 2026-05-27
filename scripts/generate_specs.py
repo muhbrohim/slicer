@@ -293,11 +293,17 @@ def extract_response_fields(section: list[str]) -> list[Field]:
     return fields
 
 
-def render_spec(api_id: str, srv_code: str, fields: list[Field]) -> str:
+def render_spec(api_id: str, srv_code: str, fields: list[Field], ep=None, pgm=None) -> str:
     """Render a .spec file as text."""
     out: list[str] = []
+    # Structured metadata header (matches scripts/backfill_spec_headers.py).
+    out.append(f"# service-code: {srv_code}")
+    out.append(f"# endpoint:     {ep.url if ep else '<none>'}")
+    out.append(f"# category:     {ep.category if ep else '-'}")
+    out.append(f"# section:      {ep.section if ep else '-'}")
+    out.append(f"# program:      {pgm.name if pgm else '<none>'}")
+    out.append("#")
     out.append(f"# {srv_code} - generated from {api_id} (specs/reff/all-spec.md).")
-    out.append("# Layout: response prefix, then service body.")
     out.append("# Review and adjust array boundaries / field types as needed.")
     out.append("")
     out.append(RESPONSE_PREFIX.rstrip())
@@ -371,6 +377,21 @@ def main() -> None:
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
+    # Load endpoints + programs so generated specs get a structured header.
+    try:
+        from slicer.endpoints import index_by_service_code, load_endpoints
+        ep_index = index_by_service_code(load_endpoints())
+    except Exception as exc:  # noqa: BLE001
+        print(f"warning: could not load endpoints map: {exc}")
+        ep_index = {}
+    try:
+        from slicer.programs import index_by_service_code as index_programs_by_service_code
+        from slicer.programs import load_programs
+        pgm_index = index_programs_by_service_code(load_programs())
+    except Exception as exc:  # noqa: BLE001
+        print(f"warning: could not load programs map: {exc}")
+        pgm_index = {}
+
     generated = []
     skipped: list[tuple[str, str, str]] = []
 
@@ -386,7 +407,10 @@ def main() -> None:
         if not fields:
             skipped.append((api_id, srv_code, "no response fields"))
             continue
-        spec_text = render_spec(api_id, srv_code, fields)
+        key = srv_code.lstrip("#").upper()
+        ep = ep_index.get(key)
+        pgm = pgm_index.get(key)
+        spec_text = render_spec(api_id, srv_code, fields, ep=ep, pgm=pgm)
         out_path = OUTPUT_DIR / f"{srv_code}.spec"
         out_path.write_text(spec_text, encoding="utf-8")
         generated.append((api_id, srv_code, len(fields)))

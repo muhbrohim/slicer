@@ -1,3 +1,9 @@
+# service-code: #CA1324
+# endpoint:     /card/ipp-eligible-program-get-details
+# category:     CA
+# section:      3.24
+# program:      LHBSR23S
+#
 # #CA1324 - generated from CTBCLH62 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

@@ -1,3 +1,9 @@
+# service-code: #CA1014
+# endpoint:     /card/activate-card
+# category:     CA
+# section:      3.2
+# program:      LHBSC14S
+#
 # #CA1014 - generated from CTBCLH02 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

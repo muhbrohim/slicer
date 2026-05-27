@@ -1,3 +1,9 @@
+# service-code: <header>
+# endpoint:     <none>
+# category:     -
+# section:      -
+# program:      <none>
+#
 # DSVI-HDR-INFO — 220-byte TCP header, shared by every API.
 # Field names match the protocol doc, except HDR-SERVICE is exposed
 # as `service_code` so the slicer dispatcher can find it.

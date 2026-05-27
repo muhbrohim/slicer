@@ -1,3 +1,9 @@
+# service-code: #CA1038
+# endpoint:     /card/cs-loan-inquiry
+# category:     CA
+# section:      4.9
+# program:      LHBSC38S
+#
 # #CA1038 - generated from CTBCLH32 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

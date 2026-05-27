@@ -1,3 +1,9 @@
+# service-code: #CA1044
+# endpoint:     /card/card-get
+# category:     CA
+# section:      4.5
+# program:      LHBSC44S
+#
 # #CA1044 - generated from CTBCLH28 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

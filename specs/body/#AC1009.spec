@@ -1,3 +1,9 @@
+# service-code: #AC1009
+# endpoint:     /account/account-block-code-set
+# category:     AC
+# section:      4.18
+# program:      LHBSA09S
+#
 # #AC1009 - generated from CTBCLH40 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

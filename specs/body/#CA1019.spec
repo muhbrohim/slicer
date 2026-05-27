@@ -1,3 +1,9 @@
+# service-code: #CA1019
+# endpoint:     /epp/convert-instalment
+# category:     CA
+# section:      3.14
+# program:      LHBSR14S
+#
 # #CA1019 - generated from CTBCLH14 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

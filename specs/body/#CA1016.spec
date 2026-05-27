@@ -1,3 +1,9 @@
+# service-code: #CA1016
+# endpoint:     /card/cash-scheme-inquiry
+# category:     CA
+# section:      3.8
+# program:      LHBSC08S
+#
 # #CA1016 - generated from CTBCLH08 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

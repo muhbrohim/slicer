@@ -1,3 +1,9 @@
+# service-code: #CA0042
+# endpoint:     /card/supplement-card-credit-control-set
+# category:     CA
+# section:      4.20
+# program:      SCDSC42S
+#
 # #CA0042 - generated from CTBCLH43 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

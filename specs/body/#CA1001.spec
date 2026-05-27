@@ -1,3 +1,9 @@
+# service-code: #CA1001
+# endpoint:     /card/card-validate
+# category:     CA
+# section:      3.10
+# program:      LHBSC01S
+#
 # #CA1001 - generated from CTBCLH10 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

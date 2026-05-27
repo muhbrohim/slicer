@@ -1,3 +1,9 @@
+# service-code: #CA1010
+# endpoint:     /card/cash-available-inquiry
+# category:     CA
+# section:      3.7
+# program:      LHBSC10S
+#
 # #CA1010 - generated from CTBCLH07 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

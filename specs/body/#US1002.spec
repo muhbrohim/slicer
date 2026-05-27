@@ -1,3 +1,9 @@
+# service-code: #US1002
+# endpoint:     /customer/cs-customer-set
+# category:     US
+# section:      4.16
+# program:      LHBSU02S
+#
 # #US1002 - generated from CTBCLH38 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

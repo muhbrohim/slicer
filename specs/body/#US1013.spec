@@ -1,3 +1,9 @@
+# service-code: #US1013
+# endpoint:     /customer/existing-inquiry
+# category:     US
+# section:      5.3
+# program:      LHBSU13S
+#
 # #US1013 - generated from CTBCLH47 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.
@@ -36,27 +42,34 @@ custOutStandingBalance          13    # O N
 custDateTempCreditExpiry         8    # O N  YYYYMMDD
 cusRiskLevelSegment             40    # O A
 custDateTempCreditStart          8    # O N  YYYYMMDD
-accountRecBreak                  4    # M A
-accountNo                       19    # M A
-accountOpenDate                  8    # O N
-cardMailingFlag                  1    # O A
-deliveryBranchCode               5    # O A
-accountStatus                   10    # O A
-accountBlockCode                 2    # O A
-dayPastDue                       3    # O N
-creditLimit                     13    # O N
-tempCreditLimit                 13    # O N
-outStandingBalance              13    # O N
-supplNumberActiveCount           3    # O A
-cardRecBreak                     4    # M A
-cardCifNo                       16    # M A
-cardId                          19    # M A
-cardNBRMask                     19    # M A
-productCode                     10    # O A
-cardAccountNumber               19    # M A
-cardStatus                      10    # M A
-cardMainType                     1    # M A
-cardIssuedDate                   8    # M N
-cardBlockCode                    2    # O A
+
+@repeat actList 10
+  accountRecBreak                  4    # M A
+  accountNo                       19    # M A
+  accountOpenDate                  8    # O N
+  cardMailingFlag                  1    # O A
+  deliveryBranchCode               5    # O A
+  accountStatus                   10    # O A
+  accountBlockCode                 2    # O A
+  dayPastDue                       3    # O N
+  creditLimit                     13    # O N
+  tempCreditLimit                 13    # O N
+  outStandingBalance              13    # O N
+  supplNumberActiveCount           3    # O A
+@end
+
+@repeat cardList 20
+  cardRecBreak                     4    # M A
+  cardCifNo                       16    # M A
+  cardId                          19    # M A
+  cardNBRMask                     19    # M A
+  productCode                     10    # O A
+  cardAccountNumber               19    # M A
+  cardStatus                      10    # M A
+  cardMainType                     1    # M A
+  cardIssuedDate                   8    # M N
+  cardBlockCode                    2    # O A
+@end
+
 endTag                           4    # M A
 

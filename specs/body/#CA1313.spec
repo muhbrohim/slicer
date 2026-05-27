@@ -1,3 +1,9 @@
+# service-code: #CA1313
+# endpoint:     /card/ipp-eligible-program-get
+# category:     CA
+# section:      3.13
+# program:      LHBSC13S
+#
 # #CA1313 - generated from CTBCLH13 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

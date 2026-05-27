@@ -1,3 +1,9 @@
+# service-code: #CA1042
+# endpoint:     /card/fee-charge
+# category:     CA
+# section:      4.29
+# program:      LHBSC42S
+#
 # #CA1042 - generated from CTBCLH58 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

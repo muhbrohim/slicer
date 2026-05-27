@@ -1,3 +1,9 @@
+# service-code: #CA1033
+# endpoint:     /card/statement-history-inquiry
+# category:     CA
+# section:      4.6
+# program:      LHBSC33S
+#
 # #CA1033 — /card/statement-history-inquiry response.
 # Layout: DSPY-RESP-MSG-DETAIL (response prefix), then a 6-element
 # statementList array, then "#LOC".

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import json
 import os
 import sys
 from pathlib import Path
@@ -12,6 +13,7 @@ from rich.console import Console
 
 from slicer import __version__
 from slicer.dispatcher import parse_message
+from slicer.endpoints import index_by_service_code, load_endpoints
 from slicer.formatter import render_json, render_raw, render_table
 from slicer.spec_loader import load_spec, spec_field_count, spec_total_length
 
@@ -117,22 +119,82 @@ spec_app = typer.Typer(
 @spec_app.command("list")
 def spec_list(
     specs_dir: Path | None = typer.Option(None, "--specs-dir"),
+    json_out: bool = typer.Option(
+        False, "--json", help="Emit a JSON array (one object per spec)."
+    ),
 ) -> None:
     """List all body specs."""
-    body_dir = _resolve_specs_dir(specs_dir) / "body"
+    root = _resolve_specs_dir(specs_dir)
+    body_dir = root / "body"
     if not body_dir.is_dir():
         typer.echo(f"error: no body spec directory at {body_dir}", err=True)
         raise typer.Exit(code=1)
     specs = sorted(body_dir.glob("*.spec"))
     if not specs:
-        typer.echo("(no body specs found)")
+        if json_out:
+            typer.echo("[]")
+        else:
+            typer.echo("(no body specs found)")
         return
+
+    # Load endpoint map once (tolerate missing file in dev environments).
+    ep_index = {}
+    try:
+        ep_index = index_by_service_code(load_endpoints(root / "reff" / "endpoints.txt"))
+    except FileNotFoundError:
+        pass
+
+    if json_out:
+        rows: list[dict[str, object]] = []
+        for path in specs:
+            entry: dict[str, object] = {
+                "service_code": path.stem,
+                "spec_path": str(path),
+            }
+            try:
+                spec = load_spec(path)
+                entry["fields"] = spec_field_count(spec)
+                entry["bytes"] = spec_total_length(spec)
+                meta = getattr(spec, "metadata", {}) or {}
+                entry["endpoint"] = (
+                    None if meta.get("endpoint") in (None, "<none>") else meta["endpoint"]
+                )
+                entry["category"] = (
+                    None if meta.get("category") in (None, "-") else meta["category"]
+                )
+                entry["section"] = (
+                    None if meta.get("section") in (None, "-") else meta["section"]
+                )
+                entry["program"] = (
+                    None if meta.get("program") in (None, "<none>") else meta["program"]
+                )
+            except (ValueError, FileNotFoundError) as exc:
+                entry["error"] = str(exc)
+                # Fall back to endpoint map by filename if loading failed.
+                ep = ep_index.get(path.stem.lstrip("#").upper())
+                if ep:
+                    entry["endpoint"] = ep.url
+                    entry["category"] = ep.category
+                    entry["section"] = ep.section
+            rows.append(entry)
+        # Sort: real endpoints first (alphabetical), orphans last.
+        rows.sort(key=lambda r: (r.get("endpoint") is None, r.get("endpoint") or "", r["service_code"]))
+        typer.echo(json.dumps(rows, indent=2, ensure_ascii=False))
+        return
+
     for path in specs:
         try:
             fields = load_spec(path)
             count = spec_field_count(fields)
             total = spec_total_length(fields)
-            typer.echo(f"{path.stem:<12} {count:>4} fields  {total:>5} bytes")
+            meta = getattr(fields, "metadata", {}) or {}
+            ep = meta.get("endpoint")
+            ep_str = ep if ep and ep != "<none>" else "-"
+            pgm = meta.get("program")
+            pgm_str = pgm if pgm and pgm != "<none>" else "-"
+            typer.echo(
+                f"{path.stem:<12} {count:>4} fields  {total:>5} bytes   {pgm_str:<9}  {ep_str}"
+            )
         except (ValueError, FileNotFoundError) as exc:
             typer.echo(f"{path.stem:<12} [invalid: {exc}]")
 

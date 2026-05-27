@@ -1,3 +1,9 @@
+# service-code: ANI6000
+# endpoint:     /card/card-pin-set
+# category:     ANI
+# section:      3.20
+# program:      <none>
+#
 # ANI6000 — verify-PIN / encrypt-PIN response.
 # Layout follows DSPY-RESP-MSG-DETAIL (response prefix), then the
 # API-specific fields, then the "#LOC" terminator.

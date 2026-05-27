@@ -18,6 +18,13 @@ def render_table(result: ParseResult, *, offsets: bool = False) -> str:
 
     if result.service_code:
         console.print(f"service_code: [bold]{result.service_code}[/bold]")
+        if result.endpoint:
+            console.print(f"endpoint:     [bold]{result.endpoint}[/bold]")
+        if result.program:
+            console.print(f"program:      [bold]{result.program}[/bold]")
+        if result.category or result.section:
+            tag = " / ".join(p for p in (result.category, result.section) if p)
+            console.print(f"category:     [dim]{tag}[/dim]")
         console.print()
 
     table = Table(show_header=True, header_style="bold")

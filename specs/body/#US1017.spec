@@ -1,3 +1,9 @@
+# service-code: #US1017
+# endpoint:     /customer/referral-search
+# category:     US
+# section:      5.2
+# program:      LHBSU17S
+#
 # #US1017 - generated from CTBCLH54 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

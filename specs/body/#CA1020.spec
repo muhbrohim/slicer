@@ -1,3 +1,9 @@
+# service-code: #CA1020
+# endpoint:     /card/usage-setting-get
+# category:     CA
+# section:      3.15
+# program:      LHBSC20S
+#
 # #CA1020 - generated from CTBCLH15 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

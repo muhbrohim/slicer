@@ -1,3 +1,9 @@
+# service-code: #CA1043
+# endpoint:     /card/interest-adjustment
+# category:     CA
+# section:      4.30
+# program:      LHBSC43S
+#
 # #CA1043 - generated from CTBCLH59 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

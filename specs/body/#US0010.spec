@@ -1,3 +1,9 @@
+# service-code: #US0010
+# endpoint:     /customer/customer-address-get
+# category:     US
+# section:      3.21
+# program:      SCDSU10S
+#
 # #US0010 - generated from CTBCLH21 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

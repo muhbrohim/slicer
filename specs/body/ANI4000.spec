@@ -1,3 +1,9 @@
+# service-code: ANI4000
+# endpoint:     /card/payment-online-add
+# category:     ANI
+# section:      3.11
+# program:      <none>
+#
 # ANI4000 - generated from CTBCLH11 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

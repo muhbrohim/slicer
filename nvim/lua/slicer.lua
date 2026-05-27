@@ -34,11 +34,15 @@ local M = {}
 
 local defaults = {
   slice_cmd = "slice",
+  spec_cmd = "spec",
   keymaps = true,
 }
 
 local config = vim.deepcopy(defaults)
 local cmd_ok = true
+
+-- Exposed for sub-modules (e.g. slicer.telescope) so they can read user config.
+M._config = config
 
 -- ---------------------------------------------------------------------------
 -- helpers
@@ -264,6 +268,7 @@ end
 
 function M.setup(opts)
   config = vim.tbl_deep_extend("force", defaults, opts or {})
+  M._config = config
   validate_cmd()
 
   -- Commands. The base names (SliceLine / SliceSelection) keep their existing
@@ -280,6 +285,16 @@ function M.setup(opts)
   ucmd("SliceOpenSpec", function(o)
     M.open_spec(o.args ~= "" and o.args or nil)
   end, { nargs = "?" })
+  ucmd("SliceFindSpec", function()
+    require("slicer.telescope").find_specs()
+  end, { desc = "slicer: telescope picker for specs" })
+  ucmd("SliceReloadSpecs", function()
+    require("slicer.telescope").reload()
+    notify("spec list cache cleared")
+  end, {})
+
+  -- Auto-register the telescope extension if telescope is available.
+  pcall(function() require("telescope").load_extension("slicer") end)
 
   -- Disable swapfile for spec body files however they are opened (`:e`,
   -- telescope, netrw, …). BufReadPre fires before the swap check, which is
@@ -315,6 +330,8 @@ function M.setup(opts)
     map(nx, "<leader>sr", function() M.slice_smart("raw") end,     { desc = "slicer: slice (raw)" })
     -- Spec opener (only meaningful in normal mode).
     map("n", "<leader>sS", M.open_spec_under_cursor, { desc = "slicer: open spec under cursor" })
+    map("n", "<leader>sf", function() require("slicer.telescope").find_specs() end,
+        { desc = "slicer: find spec (telescope)" })
   end
 end
 

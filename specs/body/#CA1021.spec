@@ -1,3 +1,9 @@
+# service-code: #CA1021
+# endpoint:     /card/usage-setting-set
+# category:     CA
+# section:      3.16
+# program:      LHBSC21S
+#
 # #CA1021 - generated from CTBCLH16 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

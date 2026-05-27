@@ -1,3 +1,9 @@
+# service-code: #CA1027
+# endpoint:     /card/perm-limit-set
+# category:     CA
+# section:      5.1
+# program:      LHBSC27S
+#
 # #CA1027 - generated from CTBCLH46 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

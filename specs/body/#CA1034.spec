@@ -1,3 +1,9 @@
+# service-code: #CA1034
+# endpoint:     /card/cs-billed-transaction-inquiry
+# category:     CA
+# section:      4.7
+# program:      LHBSC34S
+#
 # #CA1034 - generated from CTBCLH30 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

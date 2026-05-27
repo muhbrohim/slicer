@@ -1,3 +1,9 @@
+# service-code: #CA1024
+# endpoint:     /card/early-settlement
+# category:     CA
+# section:      4.13
+# program:      LHBSS13S
+#
 # #CA1024 - generated from CTBCLH36 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

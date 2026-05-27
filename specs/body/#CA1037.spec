@@ -1,3 +1,9 @@
+# service-code: #CA1037
+# endpoint:     /card/cs-payment-history-inquiry
+# category:     CA
+# section:      4.11
+# program:      LHBSC37S
+#
 # #CA1037 - generated from CTBCLH34 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

@@ -35,6 +35,10 @@ class ParseResult:
     """Full parse output: header + body + diagnostics."""
 
     service_code: str | None = None
+    endpoint: str | None = None
+    category: str | None = None
+    section: str | None = None
+    program: str | None = None
     header: list[ParsedField] = field(default_factory=list)
     body: list[ParsedField] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
@@ -48,6 +52,10 @@ class ParseResult:
     def as_dict(self) -> dict[str, object]:
         return {
             "service_code": self.service_code,
+            "endpoint": self.endpoint,
+            "category": self.category,
+            "section": self.section,
+            "program": self.program,
             "header": _build_nested(self.header),
             "body": _build_nested(self.body),
             "warnings": list(self.warnings),

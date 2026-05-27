@@ -70,6 +70,21 @@ def parse_message(
         result.unparsed_tail = message[pos_after_header:] or None
         return result
 
+    # Surface structured metadata from the body spec (endpoint, category, …).
+    meta = getattr(body_fields, "metadata", {}) or {}
+    result.endpoint = meta.get("endpoint") or None
+    if result.endpoint == "<none>":
+        result.endpoint = None
+    result.category = meta.get("category") or None
+    if result.category == "-":
+        result.category = None
+    result.section = meta.get("section") or None
+    if result.section == "-":
+        result.section = None
+    result.program = meta.get("program") or None
+    if result.program == "<none>":
+        result.program = None
+
     body_parsed, pos_after_body, body_errors = sequential_parse(
         message, body_fields, start_pos=pos_after_header
     )

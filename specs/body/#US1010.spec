@@ -1,3 +1,9 @@
+# service-code: #US1010
+# endpoint:     /customer/customer-block-code-set
+# category:     US
+# section:      4.17
+# program:      LHBSU10S
+#
 # #US1010 - generated from CTBCLH39 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

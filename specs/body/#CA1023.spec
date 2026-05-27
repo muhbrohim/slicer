@@ -1,3 +1,9 @@
+# service-code: #CA1023
+# endpoint:     /card/noti-setting-get
+# category:     CA
+# section:      3.17
+# program:      LHBSC23S
+#
 # #CA1023 - generated from CTBCLH17 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

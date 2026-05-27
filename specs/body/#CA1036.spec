@@ -1,3 +1,9 @@
+# service-code: #CA1036
+# endpoint:     /card/cs-payment-inquiry
+# category:     CA
+# section:      4.10
+# program:      LHBSC36S
+#
 # #CA1036 - generated from CTBCLH33 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

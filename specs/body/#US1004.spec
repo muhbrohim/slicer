@@ -1,3 +1,9 @@
+# service-code: #US1004
+# endpoint:     /customer/customer-get
+# category:     US
+# section:      4.3
+# program:      LHBSU04S
+#
 # #US1004 - generated from CTBCLH26 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

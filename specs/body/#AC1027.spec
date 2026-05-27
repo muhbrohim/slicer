@@ -1,3 +1,9 @@
+# service-code: #AC1027
+# endpoint:     /account/billing-channel-set
+# category:     AC
+# section:      4.27
+# program:      LHBSA27S
+#
 # #AC1027 - generated from CTBCLH56 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

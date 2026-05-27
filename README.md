@@ -191,19 +191,129 @@ name      30   string:required
 
 ## Neovim integration
 
-A thin Lua wrapper lives at [`nvim/slicer.lua`](nvim/slicer.lua).
+A thin Lua wrapper lives at [`nvim/lua/slicer.lua`](nvim/lua/slicer.lua).
 
 ```
-<leader>sp    slice the current line
-<leader>ss    slice the visual selection
-<leader>so    open the spec whose service code appears on the current line
+<leader>ss    slice the current line (or visual selection) as a table
+<leader>sb    slice with byte offsets
+<leader>sj    slice as JSON
+<leader>sr    slice as raw key=value lines
+<leader>sS    open the spec whose service code appears on the current line
+<leader>sf    fuzzy-find any spec by endpoint / service-code (telescope picker)
 ```
+
+Commands: `:SliceLine`, `:SliceSelection`, `:SliceOpenSpec [CODE]`,
+`:SliceFindSpec`, `:SliceReloadSpecs`.
 
 Set `SLICER_HOME` so the plugin can find your specs:
 
 ```lua
 vim.env.SLICER_HOME = "C:/Users/you/personal/slicer"
-require("slicer").setup()
+require("slicer").setup({
+  -- spec_cmd = "spec",   -- override if `spec` is not on $PATH
+})
+```
+
+### lazy.nvim spec (copy-paste)
+
+If you use [lazy.nvim](https://github.com/folke/lazy.nvim) with `keys` /
+`cmd` triggers, **every** keymap and command must be listed or it won't load
+the plugin on first press (and which-key won't show it). Use this block as
+the canonical list — keep it in sync whenever new bindings appear in this
+README:
+
+```lua
+{
+  dir = vim.env.SLICER_HOME .. "/nvim",   -- or your repo path
+  keys = {
+    "<leader>ss", "<leader>sb", "<leader>sj", "<leader>sr",
+    "<leader>sS", "<leader>sf",
+  },
+  cmd = {
+    "SliceLine", "SliceLineOffsets", "SliceLineJson", "SliceLineRaw",
+    "SliceSelection", "SliceSelectionOffsets", "SliceSelectionJson", "SliceSelectionRaw",
+    "SliceOpenSpec", "SliceFindSpec", "SliceReloadSpecs",
+  },
+  config = function()
+    require("slicer").setup({
+      -- absolute paths avoid PATH issues when nvim is launched outside the venv
+      slice_cmd = vim.env.SLICER_HOME .. "/.venv/Scripts/slice.exe",
+      spec_cmd  = vim.env.SLICER_HOME .. "/.venv/Scripts/spec.exe",
+    })
+  end,
+}
+```
+
+Prefer to skip the lazy-loading bookkeeping entirely? Set `lazy = false`
+and drop `keys` / `cmd` — startup cost is a few milliseconds.
+
+### Telescope picker
+
+If [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) is
+installed, the extension auto-registers and you can also call:
+
+```
+:Telescope slicer specs
+```
+
+The picker lists every body spec with `service_code  category  endpoint`
+(typing any of those filters), shows the spec file in the previewer, and
+opens the selected spec via the existing reused right-split window. Data
+comes from `spec list --json` (cached per session; clear with
+`:SliceReloadSpecs`). If telescope is not installed, the picker falls back
+to `vim.ui.select`.
+
+---
+
+## Spec metadata header
+
+Every `.spec` file under `specs/` carries a structured metadata block at the
+top so tooling (and the parser output) can surface endpoint context:
+
+```
+# service-code: #CA1017
+# endpoint:     /card/cash-transaction-add
+# category:     CA
+# section:      3.9
+# program:      LHBSC17S
+#
+# (free-form prose comments continue below, unchanged)
+```
+
+These keys are parsed by `slicer.spec_loader.load_spec()` and exposed on the
+returned `LoadedSpec.metadata` dict (and on `ParseResult.endpoint` /
+`.category` / `.section` / `.program` after a parse). Unknown keys are kept
+verbatim but ignored by the parser.
+
+To (re)generate the headers across every spec from
+[`specs/reff/endpoints.txt`](specs/reff/endpoints.txt) and
+[`specs/reff/pgm-list.tsv`](specs/reff/pgm-list.tsv):
+
+```pwsh
+python scripts/backfill_spec_headers.py            # dry-run
+python scripts/backfill_spec_headers.py --write    # apply
+```
+
+The script is idempotent and safe to re-run.
+
+### `spec list --json`
+
+`spec list --json` emits one JSON object per body spec for downstream
+tooling (the telescope picker consumes this):
+
+```json
+[
+  {
+    "service_code": "#CA1017",
+    "spec_path": "specs/body/#CA1017.spec",
+    "fields": 8,
+    "bytes": 192,
+    "endpoint": "/card/cash-transaction-add",
+    "category": "CA",
+    "section": "3.9",
+    "program": "LHBSC17S"
+  }
+]
 ```
 
 ---

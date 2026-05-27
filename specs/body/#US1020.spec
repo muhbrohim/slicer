@@ -1,3 +1,9 @@
+# service-code: #US1020
+# endpoint:     /customer/block-roll
+# category:     US
+# section:      5.4
+# program:      LHBSU20S
+#
 # #US1020 - generated from CTBCLH55 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

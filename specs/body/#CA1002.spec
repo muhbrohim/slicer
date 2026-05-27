@@ -1,3 +1,9 @@
+# service-code: #CA1002
+# endpoint:     /card/card-secure-info-inquiry
+# category:     CA
+# section:      3.3
+# program:      LHBSC02S
+#
 # #CA1002 - generated from CTBCLH03 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

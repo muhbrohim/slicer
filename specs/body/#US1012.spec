@@ -1,3 +1,9 @@
+# service-code: #US1012
+# endpoint:     /customer/suppression-set
+# category:     US
+# section:      4.21
+# program:      LHBSU12S
+#
 # #US1012 - generated from CTBCLH44 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

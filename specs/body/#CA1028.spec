@@ -1,3 +1,9 @@
+# service-code: #CA1028
+# endpoint:     /card/trasaction-inquiry
+# category:     CA
+# section:      4.24
+# program:      LHBSC28S
+#
 # #CA1028 - generated from CTBCLH50 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

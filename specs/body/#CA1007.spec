@@ -1,3 +1,9 @@
+# service-code: #CA1007
+# endpoint:     /card/card-block-code-set
+# category:     CA
+# section:      3.19
+# program:      LHBSC07S
+#
 # #CA1007 - generated from CTBCLH19 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

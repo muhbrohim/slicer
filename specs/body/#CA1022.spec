@@ -1,3 +1,9 @@
+# service-code: #CA1022
+# endpoint:     /card/noti-setting-set
+# category:     CA
+# section:      3.18
+# program:      LHBSC22S
+#
 # #CA1022 - generated from CTBCLH18 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

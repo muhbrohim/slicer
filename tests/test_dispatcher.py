@@ -116,3 +116,57 @@ def test_result_as_dict_is_json_safe(specs_root: Path):
     assert reloaded["service_code"] == "CA1017"
     assert reloaded["header"]["prefix"] == "ADSV"
     assert reloaded["body"]["amount"] == "0000000001350"
+
+
+def test_endpoint_metadata_surfaced_on_parse_result(specs_root: Path):
+    # Add a structured header to the body spec.
+    body = specs_root / "body" / "CA1017.spec"
+    original = body.read_text(encoding="utf-8")
+    body.write_text(
+        "# service-code: CA1017\n"
+        "# endpoint:     /card/cash-transaction-add\n"
+        "# category:     CA\n"
+        "# section:      3.9\n"
+        "#\n" + original,
+        encoding="utf-8",
+    )
+    result = parse_message(_build_sample(), specs_root)
+    assert result.endpoint == "/card/cash-transaction-add"
+    assert result.category == "CA"
+    assert result.section == "3.9"
+
+
+def test_endpoint_is_none_when_metadata_absent(specs_root: Path):
+    result = parse_message(_build_sample(), specs_root)
+    assert result.endpoint is None
+    assert result.category is None
+    assert result.section is None
+
+
+def test_program_metadata_surfaced_on_parse_result(specs_root: Path):
+    body = specs_root / "body" / "CA1017.spec"
+    original = body.read_text(encoding="utf-8")
+    body.write_text(
+        "# service-code: CA1017\n"
+        "# endpoint:     /card/cash-transaction-add\n"
+        "# category:     CA\n"
+        "# section:      3.9\n"
+        "# program:      LHBSC17S\n"
+        "#\n" + original,
+        encoding="utf-8",
+    )
+    result = parse_message(_build_sample(), specs_root)
+    assert result.program == "LHBSC17S"
+
+
+def test_program_is_none_when_marked_none(specs_root: Path):
+    body = specs_root / "body" / "CA1017.spec"
+    original = body.read_text(encoding="utf-8")
+    body.write_text(
+        "# service-code: CA1017\n"
+        "# program:      <none>\n"
+        "#\n" + original,
+        encoding="utf-8",
+    )
+    result = parse_message(_build_sample(), specs_root)
+    assert result.program is None

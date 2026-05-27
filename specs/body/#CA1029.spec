@@ -1,3 +1,9 @@
+# service-code: #CA1029
+# endpoint:     /card/cs-pending-transaction-inquiry
+# category:     CA
+# section:      4.25
+# program:      LHBSC29S
+#
 # #CA1029 - generated from CTBCLH52 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

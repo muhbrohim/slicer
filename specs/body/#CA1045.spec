@@ -1,3 +1,9 @@
+# service-code: #CA1045
+# endpoint:     /card/cs-activate-card
+# category:     CA
+# section:      4.12
+# program:      LHBSC45S
+#
 # #CA1045 - generated from CTBCLH35 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

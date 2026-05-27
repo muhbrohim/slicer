@@ -172,3 +172,52 @@ def test_unknown_directive_raises(tmp_path: Path):
     spec = write(tmp_path / "bad.spec", "@nope something\n")
     with pytest.raises(ValueError, match="unknown directive"):
         load_spec(spec)
+
+# -- structured metadata header --------------------------------------------
+
+
+def test_metadata_extracted_from_leading_comments(tmp_path: Path):
+    spec = write(
+        tmp_path / "h.spec",
+        "# service-code: #CA1017\n"
+        "# endpoint:     /card/cash-transaction-add\n"
+        "# category:     CA\n"
+        "# section:      3.9\n"
+        "#\n"
+        "# free-form prose line\n"
+        "prefix 4\n"
+        "service_code 6\n",
+    )
+    items = load_spec(spec)
+    assert items.metadata["service-code"] == "#CA1017"
+    assert items.metadata["endpoint"] == "/card/cash-transaction-add"
+    assert items.metadata["category"] == "CA"
+    assert items.metadata["section"] == "3.9"
+    # still behaves as a list
+    assert len(items) == 2
+    assert items[0] == ScalarField("prefix", 4)
+
+
+def test_metadata_empty_when_no_structured_comments(tmp_path: Path):
+    spec = write(tmp_path / "h.spec", "# just prose\nprefix 4\n")
+    items = load_spec(spec)
+    assert items.metadata == {}
+
+
+def test_metadata_unknown_keys_kept(tmp_path: Path):
+    spec = write(
+        tmp_path / "h.spec",
+        "# author: jane\n# endpoint: /x\nprefix 4\n",
+    )
+    items = load_spec(spec)
+    assert items.metadata["author"] == "jane"
+    assert items.metadata["endpoint"] == "/x"
+
+
+def test_loaded_spec_is_list_subclass(tmp_path: Path):
+    spec = write(tmp_path / "h.spec", "prefix 4\nservice_code 6\n")
+    items = load_spec(spec)
+    # Must behave as list for back-compat
+    assert isinstance(items, list)
+    assert items[0].name == "prefix"
+    assert list(items) == list(items)

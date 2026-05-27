@@ -19,6 +19,7 @@ emitted by the parser as `group[NN].field` (1-indexed, two-digit). Nested
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -42,14 +43,42 @@ class RepeatGroup:
 
 
 SpecItem = ScalarField | RepeatGroup
-Spec = list[SpecItem]
+
+
+class LoadedSpec(list):
+    """A list of SpecItem with a `metadata` dict attached.
+
+    Subclasses `list` so every existing caller that iterates / indexes / takes
+    `len()` of a spec continues to work unchanged. New code can read
+    `spec.metadata` to get structured header key/value pairs (e.g. endpoint,
+    service-code, category, section) captured from the leading `#` comment
+    block of the spec file.
+    """
+
+    __slots__ = ("metadata",)
+
+    def __init__(self, items=(), metadata: dict[str, str] | None = None) -> None:
+        super().__init__(items)
+        self.metadata: dict[str, str] = dict(metadata or {})
+
+
+Spec = LoadedSpec  # back-compat: callers that annotate `Spec` still work
 
 # Back-compat alias for type hints from earlier versions.
 SpecField = tuple[str, int]
 
 
+# Matches `# key: value` (allows hyphenated/underscored keys).
+_METADATA_RE = re.compile(r"^\s*#\s*([A-Za-z][\w-]*)\s*:\s*(.+?)\s*$")
+
+
 def load_spec(path: str | Path) -> Spec:
     """Load a spec file and return ordered items (ScalarField or RepeatGroup).
+
+    The returned object is a `LoadedSpec` (a `list` subclass) with an extra
+    `metadata` dict populated from any structured `# key: value` lines that
+    appear in the *leading* comment block of the file. Iteration / indexing
+    / len() behave exactly like the previous `list[SpecItem]` return type.
 
     Raises FileNotFoundError if missing, and ValueError with file:line context
     for any malformed line.
@@ -58,11 +87,14 @@ def load_spec(path: str | Path) -> Spec:
     if not spec_path.is_file():
         raise FileNotFoundError(f"spec not found: {spec_path}")
 
-    items: Spec = []
+    raw_lines = spec_path.read_text(encoding="utf-8").splitlines()
+    metadata = _extract_metadata(raw_lines)
+
+    items: list[SpecItem] = []
     seen: set[str] = set()
     current_group: tuple[str, int, list[ScalarField]] | None = None  # (name, count, fields)
 
-    for lineno, raw_line in enumerate(spec_path.read_text(encoding="utf-8").splitlines(), start=1):
+    for lineno, raw_line in enumerate(raw_lines, start=1):
         line = _strip_comment(raw_line).strip()
         if not line:
             continue
@@ -93,7 +125,7 @@ def load_spec(path: str | Path) -> Spec:
     if not items:
         raise ValueError(f"{spec_path}: spec is empty")
 
-    return items
+    return LoadedSpec(items, metadata=metadata)
 
 
 def spec_total_length(spec: Spec) -> int:
@@ -121,6 +153,29 @@ def spec_field_count(spec: Spec) -> int:
 def _strip_comment(line: str) -> str:
     idx = line.find("#")
     return line if idx == -1 else line[:idx]
+
+
+def _extract_metadata(raw_lines: list[str]) -> dict[str, str]:
+    """Capture `# key: value` pairs from the leading comment block.
+
+    Scanning stops at the first non-blank, non-comment line — metadata only
+    lives in the file's header. Bare `#` separator lines and free-form prose
+    comments (no `key:` pattern) are skipped but do NOT terminate the scan.
+    """
+    metadata: dict[str, str] = {}
+    for raw_line in raw_lines:
+        stripped = raw_line.strip()
+        if not stripped:
+            continue
+        if not stripped.startswith("#"):
+            break
+        m = _METADATA_RE.match(stripped)
+        if m is None:
+            continue
+        key, value = m.group(1).lower(), m.group(2).strip()
+        # First occurrence wins; ignore re-declarations.
+        metadata.setdefault(key, value)
+    return metadata
 
 
 def _looks_like_type_hint(token: str) -> bool:

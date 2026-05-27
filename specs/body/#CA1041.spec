@@ -1,3 +1,9 @@
+# service-code: #CA1041
+# endpoint:     /card/waive-transaction
+# category:     CA
+# section:      4.22
+# program:      LHBSC41S
+#
 # #CA1041 - generated from CTBCLH45 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

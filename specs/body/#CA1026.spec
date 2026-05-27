@@ -1,3 +1,9 @@
+# service-code: #CA1026
+# endpoint:     /card/cancel-early-settlement
+# category:     CA
+# section:      4.15
+# program:      LHBSS15S
+#
 # #CA1026 - generated from CTBCLH41 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

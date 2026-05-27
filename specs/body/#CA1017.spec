@@ -1,3 +1,9 @@
+# service-code: #CA1017
+# endpoint:     /card/cash-transaction-add
+# category:     CA
+# section:      3.9
+# program:      LHBSC09S
+#
 # #CA1017 - generated from CTBCLH09 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

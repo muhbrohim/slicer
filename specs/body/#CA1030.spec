@@ -1,3 +1,9 @@
+# service-code: #CA1030
+# endpoint:     /card/online-billed-transaction-inquiry
+# category:     CA
+# section:      3.5
+# program:      LHBSC30S
+#
 # #CA1030 — credit card statement / billed transactions response.
 # Layout: DSPY-RESP-MSG-DETAIL (response prefix), echo+paging block, a
 # 10-element billedTransactions array, then "#LOC".

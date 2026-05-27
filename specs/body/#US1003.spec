@@ -1,3 +1,9 @@
+# service-code: #US1003
+# endpoint:     /customer/customer-search
+# category:     US
+# section:      4.2
+# program:      LHBSU03S
+#
 # #US1003 — customer / array response.
 # Layout follows DSPY-RESP-MSG-DETAIL, then echo block, then a fixed
 # 20-element array of records terminated by "#LOC".
@@ -16,7 +22,7 @@ echo_mobileNumber    20
 echo_fullName       100
 echo_uid             20
 
-# --- 20 customer records, each 42 bytes
+# --- 20 customer records
 @repeat records 20
     break             4     # "=01=" .. "=20="
     cifNumber        16

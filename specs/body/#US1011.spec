@@ -1,3 +1,9 @@
+# service-code: #US1011
+# endpoint:     /customer/cycle-cut-set
+# category:     US
+# section:      4.19
+# program:      LHBSU11S
+#
 # #US1011 - generated from CTBCLH42 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

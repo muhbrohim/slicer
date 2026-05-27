@@ -1,3 +1,9 @@
+# service-code: #US1016
+# endpoint:     /customer/memo-add
+# category:     US
+# section:      4.26
+# program:      LHBSU16S
+#
 # #US1016 - generated from CTBCLH53 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

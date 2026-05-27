@@ -1,3 +1,9 @@
+# service-code: #CA1015
+# endpoint:     /card/online-card-inquiry
+# category:     CA
+# section:      3.1
+# program:      LHBSC15S
+#
 # #CA1015 - generated from CTBCLH01 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.
@@ -9,9 +15,8 @@ key_bank              4     # DT0000-KEY-BANK
 key_val              19     # DT0000-KEY-VAL
 
 # --- service body
-echo                            16    # M A  echo can ignore
 pageContinue                     1    # M A  is echo and ASC return value, is listed in FSD
-lastCardNumber                  16    # O A  is echo and ASC return value, is listed in FSD
+lastCardNumber                  19    # O A  is echo and ASC return value, is listed in FSD
 
 @repeat cardList 8
     accountNumber                   19    # M A  billing account this card belongs to

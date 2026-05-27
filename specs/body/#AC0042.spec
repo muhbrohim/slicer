@@ -1,3 +1,9 @@
+# service-code: #AC0042
+# endpoint:     /card/temp-limit-set
+# category:     AC
+# section:      3.23
+# program:      SCDSA42S
+#
 # #AC0042 - generated from CTBCLH23 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.

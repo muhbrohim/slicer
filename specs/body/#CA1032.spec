@@ -1,3 +1,9 @@
+# service-code: #CA1032
+# endpoint:     /card/online-unbill-transaction-inquiry
+# category:     CA
+# section:      3.4
+# program:      LHBSC32S
+#
 # #CA1032 - generated from CTBCLH04 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.
