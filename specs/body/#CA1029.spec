@@ -25,17 +25,21 @@ creditLimit                     13    # M N
 availableLimit                  13    # M N
 lastUsedDate                     8    # O N  YYYYMMDD
 cardType                         1    # M A  P=Primary, S=Supplementary
-recordBreak                      4    # M N
-transactionDate                  8    # M N  YYYYMMDD
-transactionExpired               8    # M A  HHMMSS
-transactionTime                  6    # M A
-transactionAmount               13    # O A
-transactionCurrency              3    # O A
-transactionDescription         100    # O A
-merchantId                      15    # M A  D=Debit to account, C=Credit to account
-merchantName                    40    # O A
-retrievalReferenceNumber        12    # M A
-transactionType                  1    # M A
-authorizationCode                6    # O A
+
+@repeat pendingTransactions 8
+  recordBreak                      4    # M N
+  transactionDate                  8    # M N  YYYYMMDD
+  transactionExpired               8    # M A  HHMMSS
+  transactionTime                  6    # M A
+  transactionAmount               13    # O A
+  transactionCurrency              3    # O A
+  transactionDescription         100    # O A
+  merchantId                      15    # M A  D=Debit to account, C=Credit to account
+  merchantName                    40    # O A
+  retrievalReferenceNumber        12    # M A
+  transactionType                  1    # M A
+  authorizationCode                6    # O A
+@end
+
 endTag                           4    # M A
 

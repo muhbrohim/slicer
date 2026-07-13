@@ -15,7 +15,9 @@ key_bank              4     # DT0000-KEY-BANK
 key_val              19     # DT0000-KEY-VAL
 
 # --- service body
-Echo_request                    72    # M A  Echo request message
+blockCode                    2    # M A  Echo request message
+channel 10
+memo 60
 status                           1    # M A  S=success, F=failed
 LOC_end                          4    # M A  Value #LOC
 

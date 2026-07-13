@@ -103,6 +103,8 @@ key_val              19     # DT0000-KEY-VAL
   delinquencyProfile24Month       24    # O A
   dayProfile24Month               24    # O A
   intoCollectionDate               8    # O N
+  cardMailingType 			            1
+  statementDeliveryType 			      1
 @end
 LOC_end                          4    # M A  Value #LOC
 

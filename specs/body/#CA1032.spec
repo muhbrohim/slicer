@@ -31,7 +31,7 @@ transactionDescription          41    # O N
 postingAmount                   12    # O A
 postingCurrency                  3    # O A
 postingDate                      8    # M A
-merchantId                      11    # M A
+merchantId                      15    # M A
 mcc                              4    # O A
 pendingFlag                      1    # M A  Y=Authorize not yet post(approved Auth), N=Posted(unbill)
 transactionType                  1    # O A  D = Debit to account , C = Credit to account

@@ -33,7 +33,7 @@ cardNumberMask       19     # M A   e.g. 1111-11xx-xxxx-1111 (or blank)
     postingDate            8    # M N   YYYYMMDD
     billingAmount         12    # M N
     billingCurrency        3    # O A
-    merchantId            11    # O A
+    merchantId            15    # O A
     retrievalRefNumber    12    # O A
     authorizationCode      6    # O A
     mcc                    4    # O A

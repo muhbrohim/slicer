@@ -33,20 +33,20 @@ lastUsedDate                     8    # O N  YYYYMMDD
 statementChannel                10    # M A
 cardNumberMask                  19    # M A
 cardMainType                     1    # M A  P=Primary, S=Supplementary
-recBreak                         4    # M  Array of objects
-postDate                         8    # M A  value:#REC
-transactionFlag                  2    # M N  YYYYMMDD
-transactionCode                  4    # M A
-transactionDate                  8    # M A
-transactionTime                  6    # M N  YYYYMMDD
-transactionAmount               13    # M N  HHMMSS
-transactionCurrency              3    # M N
-transactionChannel              10    # M A
-transactionDecription          100    # M A
-billingAmount                   13    # M A
-billingCurrency                  3    # M N
 
-@repeat f_3 10
+@repeat billedTransactions 10
+    recBreak                         4    # M  Array of objects
+    postDate                         8    # M A  value:#REC
+    transactionFlag                  2    # M N  YYYYMMDD
+    transactionCode                  4    # M A
+    transactionDate                  8    # M A
+    transactionTime                  6    # M N  YYYYMMDD
+    transactionAmount               13    # M N  HHMMSS
+    transactionCurrency              3    # M N
+    transactionChannel              10    # M A
+    transactionDecription          100    # M A
+    billingAmount                   13    # M A
+    billingCurrency                  3    # M N
     acquirerCountry                  3    # M A
     merchantId                      15    # O A
     retrievalReferenceNumber        12    # O A
@@ -54,6 +54,6 @@ billingCurrency                  3    # M N
     authorizationCode                6    # M A  D = Debit to account , C = Credit to account
     merchantCategoryCode             4    # O A
     referenceNumber_2               11    # O A  date + batch number + sequence numb
-    LOC_end                          4    # M A  Value #LOC
 @end
 
+LOC_end                          4    # M A  Value #LOC

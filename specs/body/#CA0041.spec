@@ -1,10 +1,10 @@
-# service-code: #CA1011
-# endpoint:     /card/card-issue
+# service-code: #CA0041
+# endpoint:     /card/supplement-card-credit-control-set
 # category:     CA
-# section:      4.23
-# program:      LHBSC11S
+# section:      4.20
+# program:      SCDSC41S
 #
-# #CA1011 - generated from CTBCLH51 (specs/reff/all-spec.md).
+# #CA0041 - generated from CTBCLH43 (specs/reff/all-spec.md).
 # Layout: response prefix, then service body.
 # Review and adjust array boundaries / field types as needed.
 
@@ -15,9 +15,8 @@ key_bank              4     # DT0000-KEY-BANK
 key_val              19     # DT0000-KEY-VAL
 
 # --- service body
-
-isCharge               1
-memo                  60
-channel               10
-status                 1
+suppCardLimit			              13
+channel	                        10
+memo	                          60
+status                           1    # O N
 

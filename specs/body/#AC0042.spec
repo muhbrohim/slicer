@@ -15,7 +15,15 @@ key_bank              4     # DT0000-KEY-BANK
 key_val              19     # DT0000-KEY-VAL
 
 # --- service body
-Echo_Request                   132    # M A  Echo message request
+tempCustAmount	13
+tempCustStartDate	8
+tempCustEndDate	8
+tempAcctAmount	13
+tempAcctStartDate	8
+tempAcctEndDate	8
+reasonCode	4
+channel	10
+memo	60
 updateStatusSuccess              1    # M A  approved amount
 approvedAmount                  13    # M N
 currentLimit                    13    # M N  current limit ( before temp )

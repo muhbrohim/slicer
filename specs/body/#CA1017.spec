@@ -15,7 +15,15 @@ key_bank              4     # DT0000-KEY-BANK
 key_val              19     # DT0000-KEY-VAL
 
 # --- service body
-echo_request                   135    # M A  echo from request msg
+programCode	10
+productCode	10
+programScheme	10
+programType		1
+requestAmount		13
+channel		10
+memo		60
+transactionId		22
+reversalFlag		1
 Status                           1    # M A  Status transaction
 approvalCode                     6    # M A  Aprroval code
 LOC_end                          4    # M A  Value #LOC
