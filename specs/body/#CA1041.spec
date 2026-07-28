@@ -15,7 +15,11 @@ key_bank              4     # DT0000-KEY-BANK
 key_val              19     # DT0000-KEY-VAL
 
 # --- service body
-Echo_Request                    98    # M A  Echo from request message
+transactionAmount               13
+transactionCode                 4
+referenceNumber                 11
+channel                         10
+memo                            60
 status                           1    # M A  S(Success)/F(Failed)
 LOC_end                          4    # M A  Value #LOC
 
